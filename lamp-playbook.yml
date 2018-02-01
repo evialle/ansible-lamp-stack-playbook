@@ -9,8 +9,10 @@
   - name: Gathering Facts
     setup:
   roles:
-    - apache2
+    - common
     - mysql
-    - php-fpm
+    - apache2
+    - wordpress
+    - asterisk
   vars:
     mysql_root_password: "mypass"

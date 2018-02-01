@@ -1,19 +1,9 @@
-- name: Add the repository for MySql 5.6
-  become: yes
-  command: add-apt-repository 'deb http://archive.ubuntu.com/ubuntu trusty universe'
-
-- name: Update
-  become: yes
-  command: apt-get update
-
 - name: Install mysql
   apt: pkg={{ item }} state=installed
   become: true
   with_items:    
-    - mysql-server-5.6
-    - mysql-client-5.6
+    - mysql-server
     - python-mysqldb
-    - libmysqlclient-dev
 
 - name : Ensure mysql started
   become: yes

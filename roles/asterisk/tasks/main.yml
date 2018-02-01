@@ -1,0 +1,6 @@
+- name: Install Admin tools
+  become: true
+  apt: pkg={{ item }} state=installed update_cache=true
+  with_items:
+  - fail2ban
+
