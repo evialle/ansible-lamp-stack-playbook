@@ -1,6 +1,6 @@
-- name: Install Admin tools
+- name: Install Asterisk
   become: true
   apt: pkg={{ item }} state=installed update_cache=true
   with_items:
-  - fail2ban
+  - asterisk
 

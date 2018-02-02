@@ -12,7 +12,8 @@
     - common
     - mysql
     - apache2
-    - wordpress
+    - vtiger
     - asterisk
+    - wordpress
   vars:
     mysql_root_password: "mypass"

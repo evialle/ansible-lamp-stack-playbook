@@ -4,4 +4,18 @@
   with_items:
   - fail2ban
   - htop
+  - sendmail
 
+#Install daily maintenance
+- copy:
+    src: files/maintenanceDaily.sh
+    dest: /root/maintenanceDaily.sh
+    owner: root
+    group: root
+    mode: 0744
+
+- cron:
+    name: "Cron Daily Maintenance"
+    minute: "0"
+    hour: "2"
+    job: "sh /root/maintenanceDaily.sh"

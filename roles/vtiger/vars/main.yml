@@ -1,0 +1,7 @@
+wp_version: 4.9.2
+
+
+# These are the VTiger database settings
+vtiger_db_name: crm 
+vtiger_db_user: crm
+vtiger_db_password: mycrm123

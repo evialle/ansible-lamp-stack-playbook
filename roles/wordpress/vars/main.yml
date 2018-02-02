@@ -1,5 +1,4 @@
-wp_version: 4.2.4
-wp_sha256sum: 42ca594afc709cbef8528a6096f5a1efe96dcf3164e7ce321e87d57ae015cc82
+wp_version: 4.9.2
 
 wp_debug: true
 
@@ -9,5 +8,4 @@ core_update_level: false
 # These are the WordPress database settings
 wp_db_name: wordpress 
 wp_db_user: wordpress
-wp_db_password: secret
-
+wp_db_password: wordpressSecret#
