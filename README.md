@@ -46,5 +46,5 @@ ansible-playbook site.yml
 
 4. Destroy the Droplet on Digital Ocean
 ```
-ansible-playbook site.yml
+ansible-playbook destroy.yml
 ```
