@@ -1,0 +1,6 @@
+- name: Install Slapd
+  become: true
+  apt: pkg={{ item }} state=installed update_cache=true
+  with_items:
+  - slapd 
+  - ldap-utils 

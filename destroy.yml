@@ -1,0 +1,13 @@
+- hosts: localhost
+  connection: local
+  vars_files:
+    - keys.yml
+    - customer.yml
+  tasks:
+    - name: Delete droplet
+      digital_ocean: 
+        state: absent
+        name: "client-{{ customer_dns }}"
+        unique_name: yes
+        api_token: "{{ do_token }}"
+

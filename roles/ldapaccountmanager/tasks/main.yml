@@ -1,0 +1,5 @@
+- name: Install LDAP Account Manager
+  become: true
+  apt: pkg={{ item }} state=installed update_cache=true
+  with_items:
+  - ldap-account-manager

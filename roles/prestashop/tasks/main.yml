@@ -1,0 +1,61 @@
+- name: Check if CRM Dir is already presents
+  stat:
+    path: /var/www/shop
+  register: shop_source_installed
+
+
+- name: Download Prestashop
+  get_url:
+    url:  "https://download.prestashop.com/download/releases/prestashop_{{ prestashop_version }}.zip"
+    dest: /tmp/shop.zip
+    mode: 0664
+    owner: www-data
+    group: www-data
+  when: not shop_source_installed.stat.exists
+
+- name: create shop directory
+  file:
+    path: /var/www/shop
+    state: directory
+    owner: www-data
+    group: www-data
+    follow: yes
+  when: not shop_source_installed.stat.exists
+
+- name: Unarchive prestashop and copy to Apache Server
+  unarchive:
+    src: /tmp/shop.zip
+    dest: /var/www/shop
+    owner: www-data
+    group: www-data
+    copy: no
+  when: not shop_source_installed.stat.exists
+
+- name: Remove downloaded package Prestashop / shop.tar.gz
+  file: 
+    path: /tmp/shop.tar.gz
+    state: absent
+  when: not shop_source_installed.stat.exists
+
+- name: Create prestashop database
+  mysql_db: name={{ prestashop_db_name }} state=present
+
+- name: Create Shop database user
+  mysql_user: name={{ prestashop_db_user }} password={{ prestashop_db_password }} priv={{ prestashop_db_name }}.*:ALL host='localhost' state=present
+
+
+## Manage Subdomain
+
+#TODO
+
+- name: Add apache vhosts configuration shop.conf
+  template:
+    src: files/shop.conf.j2
+    dest: /etc/apache2/sites-available/shop.conf
+    owner: root
+    group: root
+    mode: 0644    
+
+## Enable Apache 2 Site
+- name: enable shop vhost
+  shell: a2ensite shop

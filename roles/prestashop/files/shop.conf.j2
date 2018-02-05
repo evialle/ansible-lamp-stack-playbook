@@ -1,0 +1,26 @@
+<VirtualHost *:80>
+
+    DocumentRoot /var/www/shop/
+
+    ServerAlias shop.{{ customer_dns }}
+    ServerName shop.{{ customer_dns }}
+
+    <Directory />
+        Options FollowSymLinks
+        AllowOverride None
+    </Directory>
+
+    <Directory /home/var/www/shop/>
+        Options Indexes FollowSymLinks MultiViews
+        AllowOverride None
+        Require all granted
+    </Directory>
+
+    #mod security
+    SecRuleEngine On
+    SecRequestBodyAccess On
+    SecResponseBodyAccess Off
+    SecAuditEngine RelevantOnly
+    SecAuditLog /var/log/apache2/modsec_log
+
+</VirtualHost>

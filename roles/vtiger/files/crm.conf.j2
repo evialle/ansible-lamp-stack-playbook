@@ -1,0 +1,26 @@
+<VirtualHost *:80>
+
+    DocumentRoot /var/www/crm/
+
+    ServerAlias crm.{{ customer_dns }}
+    ServerName crm.{{ customer_dns }}
+
+    <Directory />
+        Options FollowSymLinks
+        AllowOverride None
+    </Directory>
+
+    <Directory /home/var/www/crm/>
+        Options Indexes FollowSymLinks MultiViews
+        AllowOverride None
+        Require all granted
+    </Directory>
+
+    #mod security
+    SecRuleEngine On
+    SecRequestBodyAccess On
+    SecResponseBodyAccess Off
+    SecAuditEngine RelevantOnly
+    SecAuditLog /var/log/apache2/modsec_log
+
+</VirtualHost>

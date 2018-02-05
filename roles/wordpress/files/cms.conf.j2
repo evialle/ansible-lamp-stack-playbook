@@ -1,0 +1,32 @@
+<VirtualHost *:80>
+	ServerName {{ customer_dns }}
+	Redirect / http://www.{{ customer_dns }}
+</VirtualHost>
+
+
+<VirtualHost *:80>
+
+    DocumentRoot /var/www/cms/
+
+    ServerAlias www.{{ customer_dns }}
+    ServerName www.{{ customer_dns }}
+
+    <Directory />
+        Options FollowSymLinks
+        AllowOverride None
+    </Directory>
+
+    <Directory /home/var/www/crm/>
+        Options Indexes FollowSymLinks MultiViews
+        AllowOverride None
+        Require all granted
+    </Directory>
+
+    #mod security
+    SecRuleEngine On
+    SecRequestBodyAccess On
+    SecResponseBodyAccess Off
+    SecAuditEngine RelevantOnly
+    SecAuditLog /var/log/apache2/modsec_log
+
+</VirtualHost>
