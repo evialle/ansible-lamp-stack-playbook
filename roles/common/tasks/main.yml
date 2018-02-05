@@ -1,10 +1,24 @@
-- name: Install fail2ban
+- name: Install python2 for Ansible
+  raw: bash -c "test -e /usr/bin/python || (apt -qqy update && apt install -qqy python-minimal)"
+  become: true
+  register: output
+  changed_when: output.stdout != ""
+
+- name: Install updates
+  become: true
+  apt: upgrade=dist update_cache=yes
+
+
+- name: Install common packages
   become: true
   apt: pkg={{ item }} state=installed update_cache=true
   with_items:
   - fail2ban
   - htop
   - sendmail
+  - python-pip
+  - virtualenv
+  - unzip
 
 #Install daily maintenance
 - copy:
@@ -12,10 +26,45 @@
     dest: /root/maintenanceDaily.sh
     owner: root
     group: root
-    mode: 0744
+    mode: 0700
 
 - cron:
     name: "Cron Daily Maintenance"
     minute: "0"
     hour: "2"
     job: "sh /root/maintenanceDaily.sh"
+
+# Install Digital Ocean Monitoring
+
+- name: Download DigitalOcean Monitoring Agent
+  get_url:
+    url: https://agent.digitalocean.com/install.sh
+    dest: /tmp/do_install.sh
+    mode: 0700
+- name: Install & Clean DigitalOcean Monitoring Agent
+  command: sh /tmp/do_install.sh && rm -f /tmp/do_install.sh
+
+#Reboot Server for potential upgrade
+- name: Check if reboot is required
+  stat:
+    path: /var/run/reboot-required
+  register: reboot_required_file
+
+# Send the reboot command
+- shell: sleep 2 && shutdown -r now "Ansible updates triggered"
+  ignore_errors: true
+  async: 1
+  poll: 0
+  when: reboot_required_file.stat.exists
+
+# This pause is mandatory, otherwise the existing control connection gets reused!
+- pause: seconds=30
+  when: reboot_required_file.stat.exists
+
+# Now we will run a local 'ansible -m ping' on this host until it returns.
+# This works with the existing ansible hosts inventory and so any custom ansible_ssh_hosts definitions are being used
+- local_action: shell ansible -u root -m ping {{ inventory_hostname }}
+  register: result
+  until: result.rc == 0
+  retries: 30
+  delay: 10

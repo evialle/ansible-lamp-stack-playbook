@@ -1,24 +1,45 @@
+#Reboot Server for potential upgrade
+- name: Check if CMS Dir is already presents
+  stat:
+    path: /var/www/cms
+  register: cms_source_installed
+
 - name: Download Vtiger
   get_url:
     url: https://fr.wordpress.org/wordpress-{{ wp_version}}-fr_FR.tar.gz
-    dest: /tmp/wordpress.tar.gz
+    dest: /tmp/cms.tar.gz
     mode: 0664
     owner: www-data
     group: www-data
+  when: not cms_source_installed.stat.exists
+
 
 - name: Download Wordpress and copy to Apache Server
   unarchive:
-    src: /tmp/wordpress.tar.gz
-    dest: /var/www/html/
+    src: /tmp/cms.tar.gz
+    dest: /var/www/
     owner: www-data
     group: www-data
     copy: no
+  when: not cms_source_installed.stat.exists
+
+- name: Remove downloaded package wordpress (cms.tar.gz)
+  file: 
+    path: /tmp/cms.tar.gz
+    state: absent
+  when: not cms_source_installed.stat.exists
+
+
+- name: Rename wordpress directory to cms
+  shell: mv /var/www/wordpress /var/www/cms
+  creates: /var/www/cms/index.php
+  when: not cms_source_installed.stat.exists
+
+### Config Wordpress Database  
 
 - name: Fetch random salts for WordPress config
   local_action: command curl https://api.wordpress.org/secret-key/1.1/salt/
   register: "wp_salt"
-  become: no
-  become_method: sudo
 
 - name: Create WordPress database
   mysql_db: name={{ wp_db_name }} state=present
@@ -29,14 +50,31 @@
 #- name: Copy WordPress config file
 #  template: src=wp-config.php dest=/srv/wordpress/
 
-#- name: Start php-fpm Service
-#  service: name=php-fpm state=started enabled=yes
+### Config Subdomains crm.domain name
 
+#TODO
+
+## Copy Apache 2 Configuration Sitefile
+- name: Add apache vhosts configuration
+  template:
+    src: files/cms.conf.j2
+    dest: /etc/apache2/sites-available/cms.conf
+    owner: root
+    group: root
+    mode: 0644
+
+## Enable Apache 2 Site
+- name: enable cms vhost
+  shell: a2ensite cms
+
+
+# Install WP CLI 
 - name: install wp-cli
   get_url:
     url: https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
     dest: /usr/local/bin/wp
     mode: "0755"
+    
 - name: check bash-completion config directory
   stat:
     path: /etc/bash_completion.d

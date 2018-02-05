@@ -1,18 +1,38 @@
+
+- name: Check if CRM Dir is already presents
+  stat:
+    path: /var/www/crm
+  register: crm_source_installed
+
 - name: Download Vtiger
   get_url:
     url: https://sourceforge.net/projects/vtigercrm/files/vtiger%20CRM%207.0.1/Core%20Product/vtigercrm7.0.1.tar.gz
-    dest: /var/www/html/vtigercrm.tar.gz
+    dest: /tmp/crm.tar.gz
     mode: 0664
     owner: www-data
     group: www-data
+  when: not cms_source_installed.stat.exists
 
 - name: Unarchive VTiger and copy to Apache Server
   unarchive:
-    src: /var/www/html/vtigercrm.tar.gz
-    dest: /var/www/html/
+    src: /tmp/crm.tar.gz
+    dest: /var/www/
     owner: www-data
     group: www-data
     copy: no
+  when: not cms_source_installed.stat.exists
+
+
+- name: Remove downloaded package vtiger / crm.tar.gz
+  file: 
+    path: /tmp/crm.tar.gz
+    state: absent
+  when: not cms_source_installed.stat.exists
+
+- name: Rename tiger directory to crm
+  command: mv /var/www/vtigercrm /var/www/crm
+  when: not cms_source_installed.stat.exists
+
 
 - name: Create VTiger database
   mysql_db: name={{ vtiger_db_name }} state=present
@@ -20,3 +40,18 @@
 - name: Create VTiger database user
   mysql_user: name={{ vtiger_db_user }} password={{ vtiger_db_password }} priv={{ vtiger_db_name }}.*:ALL host='localhost' state=present
 
+
+## Manage Subdomain
+
+
+- name: Add apache vhosts configuration crm.conf
+  template:
+    src: files/crm.conf.j2
+    dest: /etc/apache2/sites-available/crm.conf
+    owner: root
+    group: root
+    mode: 0644    
+
+## Enable Apache 2 Site
+- name: enable crm vhost
+  shell: a2ensite crm
