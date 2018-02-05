@@ -9,7 +9,9 @@ This ansible script install everything needed for a small business company on on
  * The shop tool (Prestashop) will be accessible at shop.{{customer_dns}}
  * The CRM tool (Vtiger) will be accessibl at crm.{{customer_dns}} 
 
-## Prerequisites
+This playbook is for educational purpose. This playbook helped me to learn and understand the capacities of ansible.
+
+## Pre-requisites
 
 * ansible 2.4
 * Digital Ocean API Key
